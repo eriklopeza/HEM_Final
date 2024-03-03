@@ -10,6 +10,17 @@
 ;   none
 		EXPORT	_bzero
 _bzero
+		PUSH    {r4, lr}        ; Save r4 and lr on the stack
+        MOV     r2, #0          ; Set r4 to 0 (for zero-initialization)
+
+loop    CMP     r1, #0          ; Check if n is zero
+        BEQ     done            ; If so, exit the loop
+
+        STRB    r2, [r0], #1    ; Store zero byte at the memory location pointed by r0, and increment r0
+        SUBS    r1, r1, #1      ; Decrement n
+        BNE     loop            ; If n is not zero, repeat the loop
+
+done    POP     {r4, pc}        ; Restore r4 and return
 			
 		MOV		pc, lr	
 
@@ -20,46 +31,28 @@ _bzero
 ;	src	- pointer to the zero-terminated string to copy from
 ;	size	- a total of n bytes
 ; Return value
-;   dest
+;   dest 
+; why strncpy is being skipped????????????
 		EXPORT	_strncpy
 _strncpy
-		; implement your complete logic, including stack operations
-		
-		
-		push {r4, r5, r6, r7, lr}  ;// Preserve registers
+		push {r4, lr}
+	
+cpy_loop
+		LDRB    r3, [r1], #1    ; Load byte from src and increment src pointer
+		STRB    r3, [r0], #1    ; Store byte to dest and increment dest pointer
+		SUBS    r2, r2, #1      ; Decrement size
+		CBZ     r3, over        ; Check if the copied byte is null (end of string)
+		CBZ     r2, over        ; Check if size is zero
+		BNE     cpy_loop       ; Repeat loop if neither condition is met
 
-		;// r0 = destination string
-		;// r1 = source string
-		;// r2 = maximum number of characters to copy
+over
+    POP     {r4, pc}        ; Restore r4 and return
+	
 
-		mov r4, r0      ;// Copy destination string address to r4
-		mov r5, r1      ;// Copy source string address to r5
-		mov r6, r2      ;// Copy maximum number of characters to copy to r6
-		b loop
-		
-    
-    loop    
-		ldrb r7, [r5], #1    ;// Load byte from source string and increment source pointer
-        cmp r7, #0           ;// Check if byte is null terminator
-        beq end             ; // If byte is null terminator, exit loop
-
-        strb r7, [r4], #1    ;// Store byte to destination string and increment destination pointer
-        subs r6, r6, #1      ;// Decrement character count
-        beq fin             ; // If character count reaches 0, exit loop
-
-        b loop               ;// Branch back to loop
-
-    
-     fin   
-		movs r7, #0          ;// Null terminate the destination string
-        strb r7, [r4]       ; // Store null terminator at the end of destination string
-
-		pop {r4, r5, r6, r7, pc} ;// Restore registers and return
-
+	MOV		pc, lr	
 		
 		
 		
-		MOV		pc, lr
 		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; void* _malloc( int size )
