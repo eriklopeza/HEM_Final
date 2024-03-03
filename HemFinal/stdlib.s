@@ -10,7 +10,7 @@
 ;   none
 		EXPORT	_bzero
 _bzero
-		; implement your complete logic, including stack operations
+			
 		MOV		pc, lr	
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -24,6 +24,41 @@ _bzero
 		EXPORT	_strncpy
 _strncpy
 		; implement your complete logic, including stack operations
+		
+		
+		push {r4, r5, r6, r7, lr}  ;// Preserve registers
+
+		;// r0 = destination string
+		;// r1 = source string
+		;// r2 = maximum number of characters to copy
+
+		mov r4, r0      ;// Copy destination string address to r4
+		mov r5, r1      ;// Copy source string address to r5
+		mov r6, r2      ;// Copy maximum number of characters to copy to r6
+		b loop
+		
+    
+    loop    
+		ldrb r7, [r5], #1    ;// Load byte from source string and increment source pointer
+        cmp r7, #0           ;// Check if byte is null terminator
+        beq end             ; // If byte is null terminator, exit loop
+
+        strb r7, [r4], #1    ;// Store byte to destination string and increment destination pointer
+        subs r6, r6, #1      ;// Decrement character count
+        beq fin             ; // If character count reaches 0, exit loop
+
+        b loop               ;// Branch back to loop
+
+    
+     fin   
+		movs r7, #0          ;// Null terminate the destination string
+        strb r7, [r4]       ; // Store null terminator at the end of destination string
+
+		pop {r4, r5, r6, r7, pc} ;// Restore registers and return
+
+		
+		
+		
 		MOV		pc, lr
 		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
