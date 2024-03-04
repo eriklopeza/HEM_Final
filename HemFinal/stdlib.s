@@ -32,24 +32,28 @@ done    POP     {r4, pc}        ; Restore r4 and return
 ;	size	- a total of n bytes
 ; Return value
 ;   dest 
-; why strncpy is being skipped????????????
+
 		EXPORT	_strncpy
 _strncpy
-		push {r4, lr}
+		 ; r2 = 40, r1 = a r0 = b
+		
+		MOV R5, R2
 	
 cpy_loop
-		LDRB    r3, [r1], #1    ; Load byte from src and increment src pointer
-		STRB    r3, [r0], #1    ; Store byte to dest and increment dest pointer
-		SUBS    r2, r2, #1      ; Decrement size
-		CBZ     r3, over        ; Check if the copied byte is null (end of string)
-		CBZ     r2, over        ; Check if size is zero
-		BNE     cpy_loop       ; Repeat loop if neither condition is met
+		LDRB R4, [R1], #1
+		STRB R4, [R0], #1 
+		SUBS R5, R5, #1
+		BEQ over
+	
+		B cpy_loop
+		
 
 over
-    POP     {r4, pc}        ; Restore r4 and return
+	;mov r3, #0
 	
+	MOV		PC, LR
 
-	MOV		pc, lr	
+
 		
 		
 		
