@@ -50,7 +50,15 @@ _timer_update
 	    EXPORT	_signal_handler
 _signal_handler
 	;; Implement by yourself
+		CMP	R0, #SIGALRM
+		BNE	sig_done
+		LDR	R3, =USR_HANDLER
+		LDR	R2, [R3]
+		STR	R1, [R3]
 	
-		MOV		pc, lr		; return to Reset_Handler
+sig_done
+		MOV	R0, R2
+		
+		MOV pc, lr		; return to Reset_Handler
 		
 		END		
