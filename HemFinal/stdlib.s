@@ -67,9 +67,17 @@ over
 		EXPORT	_malloc
 _malloc
 		; save registers
+		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+		
+		; r0 = size
+		
 		; set the system call # to R7
+		MOV	r7, #0x4
 	        SVC     #0x0
 		; resume registers
+		MOV		r0, r4
+		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+
 		MOV		pc, lr
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
