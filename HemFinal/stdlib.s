@@ -10,17 +10,18 @@
 ;   none
 		EXPORT	_bzero
 _bzero
-		PUSH    {r4, lr}        ; Save r4 and lr on the stack
-        MOV     r2, #0          ; Set r4 to 0 (for zero-initialization)
+		
+        MOV     r2, #0          ; Set r2 to 0 (for zero-initialization)
 
-loop    CMP     r1, #0          ; Check if n is zero
-        BEQ     done            ; If so, exit the loop
+loop    
+		CMP     r1, #0          ; Check if n is zero
+        BEQ     bz_done            ; If so, exit the loop
 
         STRB    r2, [r0], #1    ; Store zero byte at the memory location pointed by r0, and increment r0
         SUBS    r1, r1, #1      ; Decrement n
         BNE     loop            ; If n is not zero, repeat the loop
 
-done    POP     {r4, pc}        ; Restore r4 and return
+bz_done   
 			
 		MOV		pc, lr	
 
@@ -33,31 +34,22 @@ done    POP     {r4, pc}        ; Restore r4 and return
 ; Return value
 ;   dest 
 
-		EXPORT	_strncpy
+	EXPORT	_strncpy
 _strncpy
-		 ; r2 = 40, r1 = a r0 = b
 		
-		MOV R5, R2
+		MOV R5, R2 ; r2 = 40, r1 = a r0 = b
 	
 cpy_loop
 		LDRB R4, [R1], #1
 		STRB R4, [R0], #1 
 		SUBS R5, R5, #1
-		BEQ over
+		BEQ cpy_done
 	
-		B cpy_loop
-		
+		B cpy_loop	
 
-over
-	;mov r3, #0
-	
+cpy_done
+	;MOV R2,R1
 	MOV		PC, LR
-
-
-		
-		
-		
-		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; void* _malloc( int size )
 ; Parameters
