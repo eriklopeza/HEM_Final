@@ -26,11 +26,13 @@ _timer_init
 	
 	    ; Set SysTick reload value
     LDR     R0, =STRELOAD_MX   ; Load maximum reload value
-    STR     R0, [R0]     ; Write to SysTick reload register
+    LDR	    R1, STRELOAD
+    STR     R0, [R1]     ; Write to SysTick reload register
 
     ; Configure SysTick control register
     LDR     R0, =STCTRL_GO      ; Load desired control value
-    STR     R0, [R0]        ; Write to SysTick control register
+    LDR	    R1, STCTRL
+    STR     R0, [R1]        ; Write to SysTick control register
 	
 		MOV		pc, lr		; return to Reset_Handler
 
