@@ -208,17 +208,34 @@ Reset_Handler   PROC
         	IMPORT  __main
 	
 		; Store __initial_sp into MSP (Step 1 toward Midpoint Report)
+		
+		LDR		 R0, =__initial_sp ;temp store
+		MSR		 MSP, R0 ; isp goes in special reg msp
+
 
 		ISB     ; Let's leave as is from the original.
                 LDR     R0, =SystemInit
         	BLX     R0
 
-		; Initialize the system call table (Step 2)
-		; Initialize the heap space (Step 2)
-		; Initialize the SysTick timer (Step 2)
+		; Initialize the system call table (Step 2) ; in svc
+		IMPORT _syscall_table_init
+			
+			 LDR     R0, =_syscall_table_init
+        	BLX     R0
+		; Initialize the heap space (Step 2) ; in heap
+		; Initialize the SysTick timer (Step 2) ;down below
 	
 		; Store __initial_user_sp into PSP (Step 1 toward Midpoint Report)
+		
+		LDR		R0, =__initial_user_sp  ; temp store
+		MSR 	PSP, R0                 ; isp goes in psp
+		
 		; Change CPU mode into unprivileged thread mode using PSP
+		
+		MRS		 R1, CONTROL             ;  CONTROL register into R1
+		ORR		 R1, R1, #2              ; Set bit 0x2 to enable thread mode using PSP
+		MSR		 CONTROL, R1             ; Move the modified value back to CONTROL register
+
 
                 LDR     R0, =__main
                 BX      R0
@@ -253,10 +270,18 @@ UsageFault_Handler\
 SVC_Handler     PROC 		; (Step 2)
         	EXPORT  SVC_Handler               [WEAK]
 		; Save registers 
-		; Invoke _syscall_table_ump
+		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+	
+		; Invoke _syscall_table_jump
+		IMPORT _syscall_table_jump
+		LDR R1, =_syscall_table_jump
+		BLX R1
+		
 		; Retrieve registers
+		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+
 		; Go back to stdlib.s
-                B       .
+                BX		LR
                 ENDP
 DebugMon_Handler\
                 PROC
