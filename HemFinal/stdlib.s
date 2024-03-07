@@ -69,7 +69,7 @@ _malloc
 		; set the system call # to R7
 	;	MOV R1, 
 		MOV	r7, #0x4
-	        SVC     #0x4
+	    SVC     #0x4
 		MOV R0,R0
 		;STRB     R4, [R4, R0] ; allocate bytres
 		; resume registers
