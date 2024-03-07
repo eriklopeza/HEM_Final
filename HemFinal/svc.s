@@ -35,10 +35,7 @@ _syscall_table_init
     LDR     r1, =SYS_FREE         ; Load the address of SYS_FREE
     STR     r1, [r0, #20]         ; Store SYS_FREE address at index 20 in the table
     MOV     pc, lr                ; Return from the subroutine
-           
-	
-	
-		MOV		pc, lr
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; System Call Table Jump Routine
@@ -55,13 +52,56 @@ loop
 	ADD		R4, #4
 	LDR		R5, [R4]
 	CMP 	R5, R7	
-	BEQ		done
+	BEQ		find_routine
 	B loop
 	
 	
-done
+find_routine
+	; CMPARE ADRESS WITH curr VALUE and go to its k 
+	IMPORT _kalloc
+	IMPORT _kfree
+; adress at r4
+	 ;figure out command and tghen call its k varint 
 	 ; call kalloc in heap tp allocate memory
 	 ; implement kalloc table
+	STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+	
+	;exit
+	CMP R7, #0
+	BEQ done
+	
+	; ALARM
+	CMP R7, #1
+	;BEQ exits area
+
+	
+	;SIGANL
+	CMP R7, #2
+	;BEQ signal eara
+
+	
+	;MEMCPY
+;	CMP R7, #3
+;	LDR     R6, =_kalloc
+ ;  	BLX     R6
+
+	
+	;MALLOC
+	CMP R7, #4
+	LDR     R6, =_kalloc
+   	BLX     R6
+	;BEQ _kalloc 
+	
+	
+	;FREE
+	CMP R7, #5
+	LDR     R6, =_kfree
+   	BLX     R6
+
+	
+
+done
+	LDMIA sp!, {r1-r12, lr} ; load back registers and return address
 	BX LR
 	
 	; BL      _syscall_table_init                    ; Branch to the system call function
