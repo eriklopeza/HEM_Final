@@ -24,6 +24,14 @@ USR_HANDLER     EQU		0x20007B84		; Address of a user-given signal handler functi
 _timer_init
 	;; Implement by yourself
 	
+	    ; Set SysTick reload value
+    LDR     R0, =STRELOAD_MX   ; Load maximum reload value
+    STR     R0, [R0]     ; Write to SysTick reload register
+
+    ; Configure SysTick control register
+    LDR     R0, =STCTRL_GO      ; Load desired control value
+    STR     R0, [R0]        ; Write to SysTick control register
+	
 		MOV		pc, lr		; return to Reset_Handler
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
