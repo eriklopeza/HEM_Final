@@ -220,11 +220,19 @@ Reset_Handler   PROC
 		; Initialize the system call table (Step 2) ; in svc
 		IMPORT _syscall_table_init
 			
-			 LDR     R0, =_syscall_table_init
-        	BLX     R0
+		LDR     R0, =_syscall_table_init
+        BLX     R0
+		
 		; Initialize the heap space (Step 2) ; in heap
+		IMPORT _heap_init
+			
+		LDR     R0, =_heap_init
+        BLX     R0
 		; Initialize the SysTick timer (Step 2) ;down below
-	
+		IMPORT _timer_init
+			
+		LDR		R0,	=_timer_init
+		BLX		R0
 		; Store __initial_user_sp into PSP (Step 1 toward Midpoint Report)
 		
 		LDR		R0, =__initial_user_sp  ; temp store
@@ -297,11 +305,21 @@ SysTick_Handler\
                 PROC		; (Step 2)
         	EXPORT  SysTick_Handler           [WEAK]
 		; Save registers
+		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+
 		; Invoke _timer_update
+		IMPORT _timer_update 
+		LDR R1, =_timer_update
+		BLX R1
 		; Retrieve registers
+		LDMIA sp!, {r1-r12, lr}
 		; Change from MSP to PSP
+		MRS R0, CONTROL     ; Read CONTROL register into R0
+		ORR R0, R0, #2      ; Set the PSP bit (bit 1)
+		MSR CONTROL, R0     ; Write the modified value back to CONTROL register
+
 		; Go back to the user program
-                B       .
+                BX LR
                 ENDP
 
 GPIOA_Handler\
