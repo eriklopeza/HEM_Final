@@ -20,8 +20,19 @@ INVALID		EQU		-1			; an invalid id
 		EXPORT	_heap_init
 _heap_init
 	;; Implement by yourself
+	LDR     sp, =HEAP_TOP
 	
-		MOV		pc, lr
+ ; Initialize (MCB)
+    LDR     r0, =MCB_TOP       ; Load address of MCB top
+    LDR     r1, =MCB_BOT       ; Load address of MCB bottom
+    MOV     r2, #0             ; Clear MCB entries
+	
+_init_fill_loop	
+	STR     r2, [r0], #MCB_ENT_SZ  ; Store zero to MCB entry and increment pointer
+    CMP     r0, r1            ; Check if reached MCB bottom
+    BNE     _init_fill_loop     ; If not, continue loop
+	
+	MOV		pc, lr
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Kernel Memory Allocation
@@ -29,8 +40,37 @@ _heap_init
 		EXPORT	_kalloc
 _kalloc
 	;; Implement by yourself
-		MOV		pc, lr
+	; R0 = BYTES TO ALLOCATE
+
+		MOV 	R7, R0
+			
+		LDR     sp, =HEAP_TOP	
+		LDR		r2, [r0]   
 		
+		CMP		r0, #0              ; Check if size is zero
+		BEQ     done      ; If not, exit
+
+		
+		; Implement memory allocation logic here
+		
+		; Example: Allocate memory from the heap
+		LDR		r0, =MCB_TOP       ; Load heap top address
+		LDR		R1, =MCB_BOT       ; Load heap top address
+		
+		
+		STR		r0, [r7]            ; Update heap top
+		;LOOP
+		MOV		r7, r8              ; Return allocated memory address in r0
+		
+done
+		POP		{pc}                ; Restore return address and return
+
+fail
+		MOV		r0, #INVALID        ; Return invalid address
+		B		done          ; Exit
+	
+	MOV		pc, lr
+	 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Kernel Memory De-allocation
 ; void free( void *ptr )
