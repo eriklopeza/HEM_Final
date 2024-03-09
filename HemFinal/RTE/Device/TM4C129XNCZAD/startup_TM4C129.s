@@ -214,8 +214,8 @@ Reset_Handler   PROC
 
 
 		ISB     ; Let's leave as is from the original.
-                LDR     R0, =SystemInit
-        	BLX     R0
+        LDR     R0, =SystemInit
+        BLX     R0
 
 		; Initialize the system call table (Step 2) ; in svc
 		IMPORT _syscall_table_init
@@ -239,10 +239,8 @@ Reset_Handler   PROC
 		MSR 	PSP, R0                 ; isp goes in psp
 		
 		; Change CPU mode into unprivileged thread mode using PSP
-		
-		MRS		 R1, CONTROL             ;  CONTROL register into R1
-		ORR		 R1, R1, #2              ; Set bit 0x2 to enable thread mode using PSP
-		MSR		 CONTROL, R1             ; Move the modified value back to CONTROL register
+		MOVS	 R0, #3
+		MSR		 CONTROL, R0             ;  CONTROL register into R0
 
 
                 LDR     R0, =__main
@@ -278,15 +276,14 @@ UsageFault_Handler\
 SVC_Handler     PROC 		; (Step 2)
         	EXPORT  SVC_Handler               [WEAK]
 		; Save registers 
-		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
-	
-		; Invoke _syscall_table_jump
 		IMPORT _syscall_table_jump
-		LDR R1, =_syscall_table_jump
-		BLX R1
-		
+		PUSH {LR}
+		; Invoke _syscall_table_jump
+		BL _syscall_table_jump
+		MRS	R1, PSP
+		STR R0, [R1]
 		; Retrieve registers
-		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+		POP {LR}
 
 		; Go back to stdlib.s
                 BX		LR
@@ -305,17 +302,17 @@ SysTick_Handler\
                 PROC		; (Step 2)
         	EXPORT  SysTick_Handler           [WEAK]
 		; Save registers
-		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+		IMPORT _timer_update 
+		STMFD sp!, {r2-r12, lr}	; save all registers that could be changed
 
 		; Invoke _timer_update
-		IMPORT _timer_update 
-		LDR R1, =_timer_update
-		BLX R1
+		
+		BL  _timer_update
 		; Retrieve registers
-		LDMIA sp!, {r1-r12, lr}
+		LDMFD sp!, {r2-r12, lr}
+		
 		; Change from MSP to PSP
-		MRS R0, CONTROL     ; Read CONTROL register into R0
-		ORR R0, R0, #2      ; Set the PSP bit (bit 1)
+		MOVS R0, #3     ; Read CONTROL register into R0 AND Set the PSP bit (bit 1)
 		MSR CONTROL, R0     ; Write the modified value back to CONTROL register
 
 		; Go back to the user program
