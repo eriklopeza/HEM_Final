@@ -41,69 +41,27 @@ _syscall_table_init
 ; System Call Table Jump Routine
         EXPORT	_syscall_table_jump
 _syscall_table_jump
-	;; Implement by yourself
-	
-	
-	LDR     R4, =SYSTEMCALLTBL   ; Load the base address of the system call table
-	LDR		R5, [R4]
-	CMP 	R5, R7 ; r7 adress to r4 value
-	BEQ done
-loop	
-	ADD		R4, #4
-	LDR		R5, [R4]
-	CMP 	R5, R7	
-	BEQ		find_routine
-	B loop
-	
-	
-find_routine
-	; CMPARE ADRESS WITH curr VALUE and go to its k 
+	; Implement by yourself
+
+	IMPORT _signal_handler
+	IMPORT _timer_start
 	IMPORT _kalloc
 	IMPORT _kfree
-; adress at r4
-	 ;figure out command and tghen call its k varint 
-	 ; call kalloc in heap tp allocate memory
-	 ; implement kalloc table
-	STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
-	
-	;exit
-	CMP R7, #0
-	BEQ done
-	
-	; ALARM
+
+
 	CMP R7, #1
-	;BEQ exits area
-
+	BEQ _timer_start
 	
-	;SIGANL
 	CMP R7, #2
-	;BEQ signal eara
-
+	BEQ _signal_handler
 	
-	;MEMCPY
-;	CMP R7, #3
-;	LDR     R6, =_kalloc
- ;  	BLX     R6
-
+	CMP R7, #3
+	BEQ _kalloc
 	
-	;MALLOC
 	CMP R7, #4
-	LDR     R6, =_kalloc
-   	BLX     R6
-	;BEQ _kalloc 
-	
-	
-	;FREE
-	CMP R7, #5
-	LDR     R6, =_kfree
-   	BLX     R6
+	BEQ _kfree
 
-	
 
-done
-	LDMIA sp!, {r1-r12, lr} ; load back registers and return address
-	BX LR
-	
 	; BL      _syscall_table_init                    ; Branch to the system call function
 	 MOV		pc, lr			
 		
