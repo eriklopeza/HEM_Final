@@ -10,21 +10,22 @@
 ;   none
 		EXPORT	_bzero
 _bzero
+		STMFD	sp!, {r1-r12,lr}
 		
         MOV     r2, #0          ; Set r2 to 0 (for zero-initialization)
-
+		MOV R4,R0		; DUMMY STORE
 loop    
-		CMP     r1, #0          ; Check if n is zero
-        BEQ     bz_done            ; If so, exit the loop  
-
-        STRB    r2, [r0], #1    ; Store zero byte at the memory location pointed by r0, and increment r0
         SUBS    r1, r1, #1      ; Decrement n
-        BNE     loop            ; If n is not zero, repeat the loop
+        BMI     bz_done            ; If so, exit the loop  
+        STRB    r2, [r0], #1    ; Store zero byte at the memory location pointed by r0, and increment r0
+        B     loop            ; If n is not zero, repeat the loop
 
 bz_done   
-			
-		MOV		pc, lr	
+		MOV R0, R4
+		LDMFD	sp!, {r1-r12,lr}
 
+		MOV		pc, lr	
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; char* _strncpy( char* dest, char* src, int size )
 ; Parameters
@@ -36,21 +37,26 @@ bz_done
 
 		EXPORT	_strncpy
 _strncpy
-		
-		MOV R5, R2 ; r2 = 40, r1 = a r0 = b
+		STMFD	sp!, {r1-r12,lr}
+
+		MOV R5, R0 ; r2 = 40, r1 = a r0 = b, R4 = 2 R1 VAL, R5= CPY OF ADRESS
 		
 	
 cpy_loop
+        SUBS    r2, r2, #1      ; Decrement n
+		BMI cpy_done
+
 		LDRB R4, [R1], #1
 		STRB R4, [R0], #1 
-		SUBS R5, R5, #1
-		BEQ cpy_done
-	
+		
+		CMP R4, #0
+		BEQ cpy_done	; CHECKS FOR IF AT END VIA THE /0
 		B cpy_loop	
 
 cpy_done
-	;MOV R2,R1
-	
+	MOV R0,R5
+	LDMFD	sp!, {r1-r12,lr}
+ 
 	MOV		PC, LR
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -62,19 +68,17 @@ cpy_done
 			EXPORT	_malloc
 _malloc
 		; save registers
-		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+		STMFD sp!, {r1-r12, lr}	; save all registers that could be changed
 		
 		; r0 = size
 		
 		; set the system call # to R7
 	;	MOV R1, 
-		MOV	r7, #0x4
-	    SVC     #0x4
-		MOV R0,R0
-		;STRB     R4, [R4, R0] ; allocate bytres
+		MOV	r7, #3
+	    SVC     #0x0
 		; resume registers
 		
-		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+		LDMFD sp!, {r1-r12, lr} ; load back registers and return address
 
 		MOV		pc, lr
 
@@ -87,14 +91,14 @@ _malloc
 		EXPORT	_free
 _free
 		; save registers
-		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+		STMFD sp!, {r1-r12, lr}	; save all registers that could be changed
 
 		; set the system call # to R7
-		MOV	r7, #0x5
-        	SVC     #0x5
+		MOV	r7, #4
+        SVC     #0x0
 		
 		; resume registers
-		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+		LDMFD sp!, {r1-r12, lr} ; load back registers and return address
 		MOV		pc, lr
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -108,12 +112,12 @@ _free
 		EXPORT	_alarm
 _alarm
 		; save registers
-		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+		STMFD sp!, {r1-r12, lr}	; save all registers that could be changed
 		; set the system call # to R7
-		MOV	r7, #0x1
-        	SVC     #0x0
+		MOV	r7, #1
+        SVC     #0x0
 		; resume registers	
-		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+		LDMFD	sp!, {r1-r12,lr}	; resume registers
 
 		MOV		pc, lr		
 			
@@ -128,15 +132,14 @@ _alarm
 		EXPORT	_signal
 _signal
 		; save registers
-		STMDB sp!, {r1-r12, lr}	; save all registers that could be changed
+		STMFD sp!, {r2-r12, lr}	; save all registers that could be changed
 		; set the system call # to R7
-		MOV	r7, #0x2
-        	SVC     #0x0
-		; resume registers
-		LDMIA sp!, {r1-r12, lr} ; load back registers and return address
+		MOV	r7, #2
+        SVC     #0x0
+		; resume registers	
+		LDMFD	sp!, {r2-r12,lr}	; resume registers
 
-		; not sure how to return properly
-		MOV		pc, lr	
+		MOV		pc, lr		
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		END			
