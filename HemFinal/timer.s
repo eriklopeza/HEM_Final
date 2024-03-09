@@ -102,7 +102,6 @@ _signal_handler
 	
 sig_done
 		MOV	R0, R2
-		
 		MOV pc, lr		; return to Reset_Handler
 		
 		END		
