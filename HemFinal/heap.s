@@ -156,10 +156,10 @@ r_done
 		EXPORT	_kfree
 _kfree 
 		;; Implement by yourself
-		PUSH	{lr}
-  		LDR		R1, =HEAP_TOP				; Load the HEAP_TOP value into R2
-    	LDR		R2, =HEAP_BOT				; Load the HEAP_BOT value into R3	
-		LDR  	R4, =MCB_TOP     			; Load the top of the MCB
+			PUSH	{lr}
+			LDR		R1, =HEAP_TOP				; Load the HEAP_TOP value into R2
+			LDR		R2, =HEAP_BOT				; Load the HEAP_BOT value into R3	
+			LDR  	R4, =MCB_TOP     			; Load the top of the MCB
 		
 		MOV		R3, R0					; Move pointer address into register R1
 
@@ -191,14 +191,14 @@ _kfree
 		MOV		pc, lr
 	
 _rfree	
-		PUSH	{lr}
+			PUSH	{lr}
 											; R0 = MCB_addr
-  		LDR R1, =MCB_TOP				; R1 = MCB_TOP
-  		SUB R2, R0, R1		 		; R2 = mcb_offset -> mcb_addr - mcb_top
-		LDR R3, [R0]                 ; R3 = mcb_contents
-		ASR R4, R3, #4		 		; R4 = mcb_chunk
-		LSL R5, R3, #4		 		; R5 = my_size
-		LDR R7, =MCB_BOT
+			LDR R1, =MCB_TOP				; R1 = MCB_TOP
+			SUB R2, R0, R1		 		; R2 = mcb_offset -> mcb_addr - mcb_top
+			LDR R3, [R0]                 ; R3 = mcb_contents
+			ASR R4, R3, #4		 		; R4 = mcb_chunk
+			LSL R5, R3, #4		 		; R5 = my_size
+			LDR R7, =MCB_BOT
 		
 		STR R3, [R0]
   		SDIV R6, R2, R4
