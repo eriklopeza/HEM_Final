@@ -23,16 +23,13 @@ USR_HANDLER     EQU		0x20007B84		; Address of a user-given signal handler functi
 		EXPORT		_timer_init
 _timer_init
 	;; Implement by yourself
-	
-	    ; Set SysTick reload value
+	LDR		R1, =STCTRL				
+	LDR		R0, =STCTRL_STOP		
+		STR		R0, [R1]				
+	    
     LDR     R0, =STRELOAD_MX   ; Load maximum reload value
-    LDR	    R1, STRELOAD
-    STR     R0, [R1]     ; Write to SysTick reload register
-
-    ; Configure SysTick control register
-    LDR     R0, =STCTRL_GO      ; Load desired control value
-    LDR	    R1, STCTRL
-    STR     R0, [R1]        ; Write to SysTick control register
+	LDR		r1, =STRELOAD			
+		STR     R0, [R1]        ; Write to SysTick control register
 	
 		MOV		pc, lr		; return to Reset_Handler
 
@@ -42,8 +39,23 @@ _timer_init
 		EXPORT		_timer_start
 _timer_start
 	;; Implement by yourself
+	LDR R1, =SECOND_LEFT	
+	LDR R7, [R1]		
+		STR R0, [R1]	
+		
+  	
+	LDR R2, =STCTRL		
+	LDR R3, =STCTRL_GO		
+		STR R3, [R2]		
 	
-		MOV		pc, lr		; return to SVC_Handler
+  	
+	LDR R4, =STCURRENT
+	MOV R5, #0x0			
+		STR R5, [R4]	
+		
+  
+	MOV R0, R7	
+	MOV		pc, lr		; return to SVC_Handler
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Timer update
@@ -52,7 +64,29 @@ _timer_start
 _timer_update
 	;; Implement by yourself
 	
-		MOV		pc, lr		; return to SysTick_Handler
+
+	LDR		R1, =SECOND_LEFT	
+	LDR		R2, [R1] 		
+	SUB 	R2, R2, #1		
+	STR 	R2, [R1]
+	
+	
+	CMP 	R2, #0
+	BNE		done_u
+	
+	LDR		R3, =STCTRL
+	LDR		R4, =STCTRL_STOP
+	STR		R4, [R3]
+	
+	LDR 	R5, =USR_HANDLER
+	LDR		R7, [R5]
+	
+	STMFD	sp!, {r1-r12,lr}		
+	BLX 	R7
+	LDMFD	sp!, {r1-r12,lr}		
+
+done_u
+	MOV		pc, lr		; return to SysTick_Handler
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Timer update
