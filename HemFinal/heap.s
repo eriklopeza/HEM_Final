@@ -306,27 +306,32 @@ odd
 		
 	    ; Calculate new size for merged memory blocks
   		ASR R7,#5
-    	LSL R7,#5				;If the
+    	LSL R7,#5
+		; Compare if new size is not equal to current size
       	CMP R7, R5
 		BNE done				
 		
+		; Set status flag of buddy MCB to 0
+		; Double the size of memory block
+		; Store new size in buddy MCB
 		MOV R8,#0 
 		STR R8, [R0]
     	LSL R5,#1				; my_size *= 2
 		STR R5, [R6]				; Line 207
 
+		; Set R0 to address of buddy MCB for recursive call
 		MOV		R0, R6 
-		BL		_rfree					; Recursion 
+		BL		_rfree					
 		B		done
 		
 doneZ
-  		MOV 	R0, #0	
+  		MOV 	R0, #0	; when we have an invalid case set r0 to zero so we return null
 
 done
-  		POP	{lr}
+  		POP	{lr}						 
 		BX		lr					; return from rfree( )
 
-nullA
+nullA	; incase we have a null alocation case then we end up returning 0 as null
 		MOV  	R0, #0           			; Set the return value to NULL
 		POP		{LR}
 		MOV		pc, lr						
