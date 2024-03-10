@@ -15,11 +15,7 @@ SYS_FREE		EQU		0x5		; address 20007B14
 ; System Call Table Initialization
 		EXPORT	_syscall_table_init
 _syscall_table_init
-	; AFTER ADRESS FOUND send it to its corosponding k func 
-	;  FIGUREOUT ACTION AND 
-	; compare if 0 is first run through 
-	; if not then find action and send to its k function
-	; if equal than store there in this case in sysmalloc
+	
   LDR     r0, =SYSTEMCALLTBL   ; Load the base address of the system call table
 
     LDR     r1, =SYS_EXIT         ; Load the address of SYS_EXIT
@@ -42,30 +38,28 @@ _syscall_table_init
         EXPORT	_syscall_table_jump
 _syscall_table_jump
 	; Implement by yourself
+	; import calls to for the functions
+	; r7 is the call # for the equivlant call number
 
-	IMPORT _signal_handler
 	IMPORT _timer_start
-	IMPORT _kalloc
-	IMPORT _kfree
-
-
 	CMP R7, #1
 	BEQ _timer_start
 	
+	IMPORT _signal_handler	
 	CMP R7, #2
 	BEQ _signal_handler
 	
+	IMPORT _kalloc
 	CMP R7, #3
 	BEQ _kalloc
 	
+	IMPORT _kfree
 	CMP R7, #4
 	BEQ _kfree
 
-
-	; BL      _syscall_table_init                    ; Branch to the system call function
 	 MOV		pc, lr			
 		
-		END
+END
 
 
 		
