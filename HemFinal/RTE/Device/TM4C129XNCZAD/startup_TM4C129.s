@@ -207,8 +207,7 @@ Reset_Handler   PROC
                 IMPORT  SystemInit
         	IMPORT  __main
 	
-		; Store __initial_sp into MSP (Step 1 toward Midpoint Report)
-		
+		; Store __initial_sp into MSP (Step 1 toward Midpoint Report)		
 		LDR		 R0, =__initial_sp ;temp store
 		MSR		 MSP, R0 ; isp goes in special reg msp
 
@@ -239,7 +238,7 @@ Reset_Handler   PROC
 		MSR 	PSP, R0                 ; isp goes in psp
 		
 		; Change CPU mode into unprivileged thread mode using PSP
-		MOVS	 R0, #3
+		MOVS	 R0, #3					 ; Read CONTROL register into R0 AND Set the PSP bit (bit 1)
 		MSR		 CONTROL, R0             ;  CONTROL register into R0
 
 
