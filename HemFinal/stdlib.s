@@ -22,7 +22,7 @@ loop
 
 bz_done   
 		MOV R0, R4
-		LDMFD	sp!, {r1-r12,lr}
+		LDMFD	sp!, {r1-r12,lr} ; loads the values of registers and decrements the stack pointer
 
 		MOV		pc, lr	
  
@@ -39,22 +39,23 @@ bz_done
 _strncpy
 		STMFD	sp!, {r1-r12,lr}
 
-		MOV R5, R0 ; r2 = 40, r1 = a r0 = b, R4 = 2 R1 VAL, R5= CPY OF ADRESS
+		MOV R5, R0 ; CPY OF ADRESS
+		; r2 = 40, r1 = a r0 = b, R4 = 2 R1 VAL, R5= CPY OF ADRESS
 		
 	
 cpy_loop
         SUBS    r2, r2, #1      ; Decrement n
 		BMI cpy_done
 
-		LDRB R4, [R1], #1
-		STRB R4, [R0], #1 
+		LDRB R4, [R1], #1	; Load byte from memory address pointed to by R1 into R4, and increment R1 by 1
+		STRB R4, [R0], #1 	; Store byte in R4 to memory address pointed to by R0, and increment R0 by 1
 		
-		CMP R4, #0
+		CMP R4, #0		
 		BEQ cpy_done	; CHECKS FOR IF AT END VIA THE /0
-		B cpy_loop	
+		B cpy_loop		; loop till we are at /0
 
 cpy_done
-	MOV R0,R5
+	MOV R0,R5 ; CPY OF ADRESS becomes new address
 	LDMFD	sp!, {r1-r12,lr}
  
 	MOV		PC, LR
@@ -142,12 +143,12 @@ _signal
 		MOV		pc, lr		
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; void _setZeroRegisters( )
+; void _setZeroRegisters( ) EXTRA CREDIT
 ;Parameters
 ;  none
 ; Return value
 ;   none
-; Fun program that sets all registers to 0 EXTRA CREDIT
+; Fun program that sets all registers to 0 
 _setZeroRegisters
 
 		MOV R1, #0
